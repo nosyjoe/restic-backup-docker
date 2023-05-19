@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build --rm -t restic-backup .
+docker build --rm --pull --no-cache -t nosyjoe42/restic-backup-tailscale .
