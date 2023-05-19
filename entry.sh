@@ -2,6 +2,14 @@
 
 echo "Starting container ..."
 
+
+echo "Starting tailscale"
+
+tailscaled --state=tailscaled.state &
+tailscale up --authkey $TAILSCALE_AUTH_KEY
+
+echo "tailscale started."
+
 if [ -n "${NFS_TARGET}" ]; then
     echo "Mounting NFS based on NFS_TARGET: ${NFS_TARGET}"
     mount -o nolock -v ${NFS_TARGET} /mnt/restic
