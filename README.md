@@ -1,7 +1,10 @@
-# Restic Backup Docker Container
+# Restic Backup Docker Container with Tailscale support
+
 A docker container to automate [restic backups](https://restic.github.io/)
 
 This container runs restic backups in regular intervals. 
+
+It supports login to tailscale and thus backing up to one of the nodes of your tailscale network.
 
 * Easy setup and maintanance
 * Support for different targets (tested with: Local, NFS, SFTP, AWS)
@@ -18,6 +21,32 @@ Latest (experimental)
 ```
 docker pull lobaro/restic-backup-docker:latest
 ```
+
+## Tailscale
+
+Tailscale is a Mesh VPN which can be used to connect computer in different (NAT'ed) networks to one virtual network. I use it to back up my data from a docker container running restic on a Raspberry Pi in my home to another Raspberry Pi running in another location via SSH. They are connected via Tailscale so I do not have to fight with port forwardings and ip address changes.
+
+### Integration
+
+Installs the tailscale package from alpine (currently version 1.32.3-r4 from https://pkgs.alpinelinux.org/package/v3.17/community/x86_64/tailscale), starts `tailscaled` and starts the connection via `tailscale up`.
+
+An auth key is supplied via the `TAILSCALE_AUTH_KEY` env var and can be created here: https://login.tailscale.com/admin/settings/keys
+
+### Setup on Synology NAS
+
+The docker container uses `network_mode: "host"` and the tun device of the host. On my synology, I had to create the device first and
+insert the kernel module. 
+
+```
+sudo mkdir -m 755 /dev/net
+sudo mknod /dev/net/tun c 10 200
+sudo chmod 0755 /dev/net/tun
+sudo insmod /lib/modules/tun.ko
+```
+
+Not sure if the module loading (insmod) must be repeated after each reboot (probably yes; try this: https://serverfault.com/questions/1127635/how-to-load-modules-on-synology-nas-on-boot).
+
+### 
 
 ## Hooks
 
@@ -116,6 +145,7 @@ The container is setup by setting [environment variables](https://docs.docker.co
 
 ## Environment variables
 
+* `TAILSCALE_AUTH_KEY` - the auth key supplied to `tailscale up` via the `--authkey` parameter. Generate it here: https://login.tailscale.com/admin/settings/keys
 * `RESTIC_REPOSITORY` - the location of the restic repository. Default `/mnt/restic`. For S3: `s3:https://s3.amazonaws.com/BUCKET_NAME`
 * `RESTIC_PASSWORD` - the password for the restic repository. Will also be used for restic init during first start when the repository is not initialized.
 * `RESTIC_TAG` - Optional. To tag the images created by the container.
