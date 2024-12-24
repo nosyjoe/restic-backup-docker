@@ -20,7 +20,7 @@ status=$?
 echo "Check Repo status $status"
 
 if [ $status != 0 ]; then
-    echo "Restic repository '${RESTIC_REPOSITORY}' does not exists. Running restic init."
+    echo "Restic repository '${RESTIC_REPOSITORY}' does not exist. Running restic init."
     restic init ${RESTIC_INIT_ARGS}
 
     init_status=$?
