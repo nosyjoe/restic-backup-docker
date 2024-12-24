@@ -4,9 +4,10 @@ FROM alpine:latest as rclone
 ADD https://downloads.rclone.org/rclone-current-linux-amd64.zip /
 RUN unzip rclone-current-linux-amd64.zip && mv rclone-*-linux-amd64/rclone /bin/rclone && chmod +x /bin/rclone
 
-FROM restic/restic:latest
+FROM restic/restic:0.17.3-r0
 
-RUN apk add --update --no-cache heirloom-mailx fuse curl ca-certificates iptables iproute2 ip6tables tailscale
+RUN apk add --update --no-cache heirloom-mailx curl 
+RUN apk add --update --no-cache fuse ca-certificates iptables iproute2 ip6tables tailscale
 
 COPY --from=rclone /bin/rclone /bin/rclone
 
@@ -53,9 +54,6 @@ VOLUME /data
 COPY backup.sh /bin/backup
 COPY check.sh /bin/check
 COPY entry.sh /entry.sh
-
-
-WORKDIR "/"
 
 ENTRYPOINT ["/entry.sh"]
 CMD ["tail","-fn0","/var/log/cron.log"]
